@@ -1,0 +1,30 @@
+Leetcode 601. Human Traffic of Stadium
+wrote on 20260128 spending 24 mins
+
+SELECT table_o.id,
+       table_o.visit_date,
+       table_o.people
+FROM   stadium AS table_o
+       left join (SELECT id     AS vd_dm2,
+                         people AS pp_dm2
+                  FROM   stadium) AS table_dm2
+              ON table_dm2.vd_dm2 = table_o.id - 2
+       left join (SELECT id     AS vd_dm1,
+                         people AS pp_dm1
+                  FROM   stadium) AS table_dm1
+              ON table_dm1.vd_dm1 = table_o.id - 1
+       left join (SELECT id     AS vd_dp1,
+                         people AS pp_dp1
+                  FROM   stadium) AS table_dp1
+              ON table_dp1.vd_dp1 = table_o.id + 1
+       left join (SELECT id     AS vd_dp2,
+                         people AS pp_dp2
+                  FROM   stadium) AS table_dp2
+              ON table_dp2.vd_dp2 = table_o.id + 2
+WHERE  table_o.people > 100
+       AND ( ( table_dp1.pp_dp1 > 100
+               AND table_dp2.pp_dp2 > 100 )
+              OR ( table_dm1.pp_dm1 > 100
+                   AND table_dm2.pp_dm2 > 100 )
+              OR ( table_dm1.pp_dm1 > 100
+                   AND table_dp1.pp_dp1 > 100 ) ); 
