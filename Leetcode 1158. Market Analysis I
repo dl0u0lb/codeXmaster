@@ -1,0 +1,21 @@
+Leetcode 1158. Market Analysis I
+wrote on 20260128 spending 20 mins
+
+WITH oc2019
+     AS (SELECT buyer_id,
+                Count(*)
+                  over (
+                    PARTITION BY buyer_id) AS cnum
+         FROM   orders
+         WHERE  order_date >= '2019-01-01'
+                AND order_date <= '2019-12-31')
+SELECT DISTINCT dbo.user_id AS buyer_id,
+                dbo.join_date,
+                CASE
+                  WHEN oc2019.cnum IS NULL THEN 0
+                  ELSE oc2019.cnum
+                END         AS orders_in_2019
+FROM   users AS dbo
+       left join oc2019
+              ON dbo.user_id = oc2019.buyer_id
+ORDER  BY dbo.user_id; 
