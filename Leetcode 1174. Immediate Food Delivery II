@@ -1,0 +1,30 @@
+Leetcode 1174. Immediate Food Delivery II
+wrote on 20260128 spending 22 mins
+
+WITH order_imm AS
+(
+       SELECT customer_id,
+              order_date
+       FROM   delivery
+       WHERE  order_date = customer_pref_delivery_date), first_order AS
+(
+         SELECT   customer_id,
+                  Min(order_date) AS first_order_date
+         FROM     delivery
+         GROUP BY customer_id), first_order_imm AS
+(
+       SELECT customer_id
+       FROM   first_order
+       WHERE  (
+                     customer_id,first_order_date) IN
+              (
+                     SELECT customer_id,
+                            order_date
+                     FROM   order_imm))
+SELECT Round(
+              (
+              SELECT Count(customer_id)
+              FROM   first_order_imm)::NUMERIC*100/
+             (
+                    SELECT Count(customer_id)
+                    FROM   first_order),2) AS immediate_percentage ;
