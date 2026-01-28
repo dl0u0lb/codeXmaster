@@ -1,0 +1,18 @@
+Leetcode 1164. Product Price at a Given Date
+wrote on 20260128 spending 8 mins
+
+WITH product_last_price
+     AS (SELECT product_id,
+                Max(new_price) AS last_price
+         FROM   products
+         WHERE  change_date < '2019-08-17'
+         GROUP  BY product_id)
+SELECT product_list.product_id,
+       CASE
+         WHEN product_last_price.last_price IS NULL THEN 10
+         ELSE product_last_price.last_price
+       END AS price
+FROM   (SELECT DISTINCT product_id
+        FROM   products) AS product_list
+       left join product_last_price
+              ON product_list.product_id = product_last_price.product_id; 
