@@ -21,10 +21,10 @@ FROM   stadium AS table_o
                          people AS pp_dp2
                   FROM   stadium) AS table_dp2
               ON table_dp2.vd_dp2 = table_o.id + 2
-WHERE  table_o.people > 100
-       AND ( ( table_dp1.pp_dp1 > 100
-               AND table_dp2.pp_dp2 > 100 )
-              OR ( table_dm1.pp_dm1 > 100
-                   AND table_dm2.pp_dm2 > 100 )
-              OR ( table_dm1.pp_dm1 > 100
-                   AND table_dp1.pp_dp1 > 100 ) ); 
+WHERE  table_o.people >= 100
+       AND ( ( table_dp1.pp_dp1 >= 100
+               AND table_dp2.pp_dp2 >= 100 )
+              OR ( table_dm1.pp_dm1 >= 100
+                   AND table_dm2.pp_dm2 >= 100 )
+              OR ( table_dm1.pp_dm1 >= 100
+                   AND table_dp1.pp_dp1 >= 100 ) ); 
