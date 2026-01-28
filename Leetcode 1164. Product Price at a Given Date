@@ -1,12 +1,19 @@
 Leetcode 1164. Product Price at a Given Date
-wrote on 20260128 spending 8 mins
+wrote on 20260128 spending 8 mins + 20 mins
 
-WITH product_last_price
+WITH recent_change
      AS (SELECT product_id,
-                Max(new_price) AS last_price
+                Max(change_date) AS last_date
          FROM   products
          WHERE  change_date < '2019-08-17'
-         GROUP  BY product_id)
+         GROUP  BY product_id),
+     product_last_price
+     AS (SELECT product_id,
+                new_price AS last_price
+         FROM   products
+         WHERE  ( product_id, change_date ) IN (SELECT product_id,
+                                                       last_date
+                                                FROM   recent_change))
 SELECT product_list.product_id,
        CASE
          WHEN product_last_price.last_price IS NULL THEN 10
