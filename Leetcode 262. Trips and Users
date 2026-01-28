@@ -1,0 +1,41 @@
+Leetcode 262. Trips and Users
+
+
+SELECT an.day AS "Day",
+       CASE
+         WHEN Round(( 1 - ( cn.comd :: NUMERIC / an.alld :: NUMERIC ) ), 2) IS
+              NULL
+       THEN 1
+         ELSE Round(( 1 - ( cn.comd :: NUMERIC / an.alld :: NUMERIC ) ), 2)
+       END    AS "Cancellation Rate"
+FROM   (SELECT day,
+               Count(status) AS alld
+        FROM   (SELECT request_at AS day,
+                       status
+                FROM   trips AS t1
+                       left join (SELECT users_id,
+                                         banned
+                                  FROM   users
+                                  WHERE  banned = 'Yes') AS u1
+                              ON t1.client_id = u1.users_id
+                                  OR t1.driver_id = u1.users_id
+                WHERE  banned IS NULL) AS o1
+        GROUP  BY day) AS an
+       left join (SELECT day,
+                         Count(status) AS comd
+                  FROM   (SELECT request_at AS day,
+                                 status
+                          FROM   trips AS t1
+                                 left join (SELECT users_id,
+                                                   banned
+                                            FROM   users
+                                            WHERE  banned = 'Yes') AS u1
+                                        ON t1.client_id = u1.users_id
+                                            OR t1.driver_id = u1.users_id
+                          WHERE  banned IS NULL) AS o1
+                  WHERE  ( status = 'completed' )
+                  GROUP  BY day) AS cn
+              ON an.day = cn.day
+WHERE  an.day >= '2013-10-01'
+       AND an.day <= '2013-10-03'
+; 
