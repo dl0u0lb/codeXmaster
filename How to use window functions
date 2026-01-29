@@ -1,0 +1,175 @@
+Want to perform calculations across rows WITHOUT collapsing them?
+Read this!
+
+Topics:
+A. Basic Window Function Syntax
+B. The Three Main Types of Window Functions
+C. Ranking Functions
+D. Value Functions (LAG/LEAD)
+E. Aggregate Functions as Windows
+F. PARTITION BY - The Game Changer
+G. ROWS vs RANGE
+
+----------------------------------------------------------------------------------------------
+
+A. Basic Window Function Syntax
+function_name() OVER (
+    [PARTITION BY column]     -- Optional: Divide into groups
+    [ORDER BY column]         -- Optional: Order within groups
+    [ROWS/RANGE ...]          -- Optional: Define window frame
+)
+
+----------------------------------------------------------------------------------------------
+
+B. The Three Main Types of Window Functions
+Type 1: Ranking Functions
+ROW_NUMBER()
+RANK()
+DENSE_RANK()
+NTILE()
+
+Type 2: Value Functions
+LAG()
+LEAD()
+FIRST_VALUE()
+LAST_VALUE()
+NTH_VALUE()
+
+Type 3: Aggregate Functions as Windows
+SUM()
+AVG()
+COUNT()
+MAX()
+MIN()
+
+----------------------------------------------------------------------------------------------
+
+C. Ranking Functions
+ROW_NUMBER() - Unique Sequential Numbers
+-- Always gives unique numbers, even for ties
+
+RANK() - With Gaps for Ties
+-- Same rank for ties, then skips numbers
+
+DENSE_RANK() - No Gaps
+-- Same rank for ties, continues sequentially
+
+NTILE(n) - Divide into Buckets
+-- Splits rows into n equal groups
+
+name  | score | row_number | rank | dense_rank | quartile | percent_rank | cumulative_dist
+Alice | 95    | 1          | 1    | 1          | 1        | 0.00         | 0.125
+Bob   | 90    | 2          | 2    | 2          | 1        | 0.14         | 0.500
+Carol | 90    | 3          | 2    | 2          | 2        | 0.14         | 0.500
+Dave  | 90    | 4          | 2    | 2          | 2        | 0.14         | 0.500
+Eve   | 85    | 5          | 5    | 3          | 3        | 0.57         | 0.625
+Frank | 80    | 6          | 6    | 4          | 3        | 0.71         | 0.875
+Grace | 80    | 7          | 6    | 4          | 4        | 0.71         | 0.875
+Henry | 75    | 8          | 8    | 5          | 4        | 1.00         | 1.000
+
+----------------------------------------------------------------------------------------------
+
+D. Value Functions (LAG/LEAD)
+LAG() - Look at Previous Row
+-- Get value from N rows before current row
+
+LEAD() - Look at Next Row
+-- Get value from N rows after current row
+
+FIRST_VALUE() - First Value in Window
+
+LAST_VALUE() - Last Value in Window
+-- Tricky! Requires frame specification
+
+----------------------------------------------------------------------------------------------
+
+E. Aggregate Functions as Windows - using OVER ()
+Examples:
+AVG(salary) OVER () AS company_avg,
+MAX(salary) OVER () AS company_max,
+-- Overall aggregates
+
+AVG(salary) OVER (PARTITION BY department) AS dept_avg,
+MAX(salary) OVER (PARTITION BY department) AS dept_max,
+-- Over Department aggregates
+
+salary - AVG(salary) OVER (PARTITION BY department) AS diff_from_dept_avg
+-- Compare individual to department
+
+SUM(amount) OVER (ORDER BY date) AS running_total
+-- Running Total (Cumulative Sum)
+
+AVG(sales) OVER (
+        ORDER BY date
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS moving_avg_3day
+-- Moving Average (Rolling Average)
+
+----------------------------------------------------------------------------------------------
+
+F. PARTITION BY - The Game Changer
+PARTITION BY divides data into groups, then applies the function within each group
+Think of PARTITION BY as: "GROUP BY but without collapsing rows"
+
+----------------------------------------------------------------------------------------------
+
+G. ROWS vs RANGE
+ROWS - Physical Row Count
+ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+-- Last 3 rows including current
+
+ROWS BETWEEN CURRENT ROW AND 2 FOLLOWING
+-- Next 2 rows AND current
+
+ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+-- All rows from start to current
+
+ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING
+-- All rows from current to end
+
+ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+-- All rows
+
+RANGE - Logical Value Range
+RANGE looks at values, not physical rows
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
