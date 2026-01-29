@@ -1,0 +1,24 @@
+Leetcode 1204. Last Person to Fit in the Bus
+wrote on 20260128 spending 18 mins
+
+WITH turn_weight AS
+(
+         SELECT   turn,
+                  person_name,
+                  weight
+         FROM     queue
+         ORDER BY turn), turn_sum AS
+(
+         SELECT   turn,
+                  person_name,
+                  weight,
+                  (
+                         SELECT SUM(weight)
+                         FROM   turn_weight
+                         WHERE  turn_weight.turn<=queue.turn)
+         FROM     queue
+         ORDER BY turn)
+SELECT   person_name
+FROM     turn_sum
+WHERE    SUM<=1000
+ORDER BY SUM DESC limit 1 ;
