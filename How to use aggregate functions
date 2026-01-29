@@ -1,0 +1,282 @@
+Having "Runtime Error column must appear in the GROUP BY clause or be used in an aggregate function"?
+Read this!
+
+Topics:
+A. The 6 Main Aggregate Functions
+B. The #1 ERROR - Mixing Aggregated and Non-Aggregated
+C. Not understanding when to use GROUP BY
+D. Aggregate Functions with NULL
+E. Window Functions vs Aggregates
+F. Practical Patterns You Should Memorize
+
+----------------------------------------------------------------------------------------------
+
+A. The 6 Main Aggregate Functions
+
+Function        | What It Does  | Example              | Result
+COUNT()         | Count rows    | COUNT(*)             | Number of rows
+SUM()           | Add up values | SUM(salary)          | Total of all salaries
+AVG()           | Average       | AVG(salary)          | Mean salary
+MAX()           | Maximum       | MAX(salary)          | Highest salary
+MIN()           | Minimum       | MIN(salary)          | Lowest salary
+COUNT(DISTINCT) | Count unique  | COUNT(DISTINCT city) | Number of unique cities
+
+
+More about COUNT() 
+COUNT(*) - Count ALL rows (including NULLs)
+SELECT COUNT(*) FROM employees;
+-- Result: 100 (total rows)
+
+COUNT(column) - Count NON-NULL values
+SELECT COUNT(email) FROM employees;
+-- Result: 95 (5 employees have NULL email)
+
+COUNT(DISTINCT column) - Count unique non-NULL values
+SELECT COUNT(DISTINCT department) FROM employees;
+-- Result: 5 (5 different departments)
+
+Examples:
+SELECT COUNT() FROM employees;
+-- ✗ WRONG: Empty COUNT()
+-- ERROR: function count() does not exist
+
+SELECT COUNT(*) FROM employees;
+-- ✓ CORRECT: Use COUNT(*) or COUNT(column)
+
+SELECT COUNT(*) FROM employees GROUP BY department;
+-- ✗ WRONG: COUNT doesn't need GROUP BY alone
+-- Returns multiple rows (one per department)
+
+SELECT department, COUNT(*) FROM employees GROUP BY department;
+-- ✓ CORRECT: Use GROUP BY when you want counts per group
+
+----------------------------------------------------------------------------------------------
+
+B. The #1 ERROR - Mixing Aggregated and Non-Aggregated
+
+-- ✗ WRONG Example:
+SELECT 
+    department,      -- ✗ Non-aggregated
+    COUNT(*)         -- ✓ Aggregated
+FROM employees;
+-- ERROR: column "department" must appear in the GROUP BY clause
+-- Why it fails:
+-- COUNT(*) returns 1 value (total count)
+-- department returns multiple values (one per row)
+-- SQL doesn't know which department to show with the count!
+
+How to eliminate the "RUNTIME ERROR"
+Solution 1: Add GROUP BY
+SELECT 
+    department,
+    COUNT(*)
+FROM employees
+GROUP BY department;  
+-- ✓ Now department is grouped
+
+Solution 2: Remove the non-aggregated column
+SELECT COUNT(*) FROM employees;  
+-- ✓ Only aggregated
+
+Solution 3: Use window functions
+SELECT 
+    department,
+    COUNT(*) OVER () AS total_count  
+FROM employees;
+-- ✓ Window function keeps all rows
+
+----------------------------------------------------------------------------------------------
+
+C. Not understanding when to use GROUP BY
+
+The Golden Rule:
+If you use an aggregate function AND select other columns, those columns MUST be in GROUP BY.
+
+-- ✓ CORRECT Examples:
+SELECT COUNT(*), AVG(salary), MAX(salary) FROM employees;
+-- ✓ Only aggregates (no GROUP BY needed)
+
+SELECT 
+    department,          -- In GROUP BY ✓
+    COUNT(*),            -- Aggregate ✓
+    AVG(salary)          -- Aggregate ✓
+FROM employees
+GROUP BY department;     -- Groups by department ✓
+-- ✓ Grouped columns + aggregates
+
+SELECT 
+    department,          -- In GROUP BY ✓
+    job_title,           -- In GROUP BY ✓
+    COUNT(*),            -- Aggregate ✓
+    AVG(salary)          -- Aggregate ✓
+FROM employees
+GROUP BY department, job_title;  -- Both columns ✓
+-- ✓ Multiple grouped columns
+
+-- ✗ WRONG Examples:
+SELECT department, COUNT(*) FROM employees;
+-- ERROR: department must be in GROUP BY
+-- Missing GROUP BY
+
+SELECT department, job_title, COUNT(*) 
+FROM employees
+GROUP BY department;  -- Missing job_title!
+-- ERROR: job_title must be in GROUP BY
+-- Missing column in GROUP BY
+
+----------------------------------------------------------------------------------------------
+
+D. Aggregate Functions with NULL
+How NULL Affects Aggregates:
+-- Sample data:
+value
+-----
+10
+20
+NULL
+30
+
+-- COUNT(*) includes NULL rows
+SELECT COUNT(*) FROM data;  -- Result: 4
+
+-- COUNT(column) excludes NULL
+SELECT COUNT(value) FROM data;  -- Result: 3
+
+-- SUM ignores NULL
+SELECT SUM(value) FROM data;  -- Result: 60 (10+20+30)
+
+-- AVG ignores NULL
+SELECT AVG(value) FROM data;  -- Result: 20 (60/3, not 60/4)
+
+-- MAX/MIN ignore NULL
+SELECT MAX(value) FROM data;  -- Result: 30
+SELECT MIN(value) FROM data;  -- Result: 10
+
+-- Replace NULL with 0 before aggregating
+SELECT AVG(COALESCE(value, 0)) FROM data;  -- Result: 15 (60/4)
+
+----------------------------------------------------------------------------------------------
+
+E. Window Functions vs Aggregates
+[Window Functions]: Keep all rows
+VS
+[Aggregates]: Collapse rows
+
+----------------------------------------------------------------------------------------------
+
+F. Practical Patterns You Should Memorize
+Pattern 1: Count with Conditions
+SELECT 
+    COUNT(*) AS total,
+    COUNT(CASE WHEN salary > 80000 THEN 1 END) AS high_earners,
+    COUNT(CASE WHEN salary > 50000 AND salary <= 80000 THEN 1 END) AS mid_earners,
+    COUNT(CASE WHEN salary <= 50000 THEN 1 END) AS low_earners
+FROM employees;
+
+Pattern 2: Sum with Conditions
+SELECT 
+    SUM(salary) AS total_payroll,
+    SUM(CASE WHEN department = 'Engineering' THEN salary ELSE 0 END) AS eng_payroll,
+    SUM(CASE WHEN department = 'Sales' THEN salary ELSE 0 END) AS sales_payroll
+FROM employees;
+
+Pattern 3: Calculate Percentage
+SELECT 
+    ROUND(
+        COUNT(*) FILTER (WHERE status = 'active') * 100.0 / COUNT(*),
+        2
+    ) AS active_percentage
+FROM employees;
+
+Pattern 4: Group By with Multiple Aggregates
+SELECT 
+    department,
+    COUNT(*) AS num_employees,
+    SUM(salary) AS total_salary,
+    AVG(salary) AS avg_salary,
+    MAX(salary) AS max_salary,
+    MIN(salary) AS min_salary,
+    MAX(salary) - MIN(salary) AS salary_range
+FROM employees
+GROUP BY department
+ORDER BY avg_salary DESC;
+
+Pattern 5: Find Rows with MAX/MIN
+SELECT *
+FROM employees
+WHERE salary = (SELECT MAX(salary) FROM employees);
+-- Or per department
+SELECT *
+FROM employees e1
+WHERE salary = (
+    SELECT MAX(salary) 
+    FROM employees e2 
+    WHERE e2.department = e1.department
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
