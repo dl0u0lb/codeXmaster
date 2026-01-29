@@ -1,0 +1,67 @@
+1193. Monthly Transactions I
+wrote on 20260129 spending 32 mins
+learned: 
+to_char()     -- date to 'YYYY-MM'
+NULL = NULL   -- evaluates to UNKNOWN, not TRUE or FALSE
+
+-- Write your PostgreSQL query statement below
+WITH transactions_month
+     AS (SELECT id,
+                country,
+                state,
+                amount,
+                To_char(trans_date, 'yyyy-mm') AS month
+         FROM   transactions),
+     table_trans_count
+     AS (SELECT month,
+                COALESCE(country, 'unknow') AS country,
+                Count(id)                   AS trans_count
+         FROM   transactions_month
+         GROUP  BY month,
+                   country
+         ORDER  BY month),
+     table_appro_count
+     AS (SELECT month,
+                COALESCE(country, 'unknow') AS country,
+                Count(id)                   AS approved_count
+         FROM   transactions_month
+         WHERE  state = 'approved'
+         GROUP  BY month,
+                   country
+         ORDER  BY month),
+     table_tta
+     AS (SELECT month,
+                COALESCE(country, 'unknow') AS country,
+                Sum(amount)                 AS trans_total_amount
+         FROM   transactions_month
+         GROUP  BY month,
+                   country
+         ORDER  BY month),
+     table_ata
+     AS (SELECT month,
+                COALESCE(country, 'unknow') AS country,
+                Sum(amount)                 AS approved_total_amount
+         FROM   transactions_month
+         WHERE  state = 'approved'
+         GROUP  BY month,
+                   country
+         ORDER  BY month)
+SELECT table_trans_count.month,
+       CASE
+         WHEN table_trans_count.country = 'unknow' THEN NULL
+         ELSE table_trans_count.country
+       END                                           AS country,
+       table_trans_count.trans_count,
+       COALESCE(table_appro_count.approved_count, 0) AS approved_count,
+       table_tta.trans_total_amount,
+       COALESCE(table_ata.approved_total_amount, 0)  AS approved_total_amount
+FROM   table_trans_count
+       LEFT JOIN table_appro_count
+              ON table_trans_count.month = table_appro_count.month
+                 AND table_trans_count.country = table_appro_count.country
+       LEFT JOIN table_tta
+              ON table_trans_count.month = table_tta.month
+                 AND table_trans_count.country = table_tta.country
+       LEFT JOIN table_ata
+              ON table_trans_count.month = table_ata.month
+                 AND table_trans_count.country = table_ata.country; 
