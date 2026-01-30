@@ -1,0 +1,21 @@
+Want to match using like?
+Read this!
+
+Regular Expression Patterns
+Common Regex Patterns:
+Pattern   | Meaning                      | Example
+^         | Start of string              | ^Hello (starts with Hello)
+$         | End of string                | world$ (ends with world)
+.         | Any single character         | a.c matches abc, a1c
+*         | Zero or more of previous     | ab*c matches ac, abc, abbc
++         | One or more of previous      | ab+c matches abc, abbc NOT ac
+?         | Zero or one of previous      | ab?c matches ac, abc
+[abc]     | Any of a, b, or c            | [abc] matches a, b, or c
+[a-z]     | Any lowercase letter         | [a-z] matches a to z
+[A-Z]     | Any uppercase letter         | [A-Z] matches A to Z
+[0-9]     | Any digit                    | [0-9] matches 0 to 9
+[^abc]    | NOT a, b, or c               | [^abc] matches any except a, b, c
+\d        | Digit (same as [0-9])        | \d\d matches 12, 99
+\w        | Word char (a-z, A-Z, 0-9, _) | \w+ matches hello_123
+\s        | Whitespace                   | \s matches space, tab, newline
+\.        | Literal period               | \.com matches .com
