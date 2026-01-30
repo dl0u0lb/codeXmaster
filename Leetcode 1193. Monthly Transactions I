@@ -1,4 +1,4 @@
-1193. Monthly Transactions I
+Leetcode 1193. Monthly Transactions I
 wrote on 20260129 spending 32 mins
 learned: 
 to_char()     -- date to 'YYYY-MM'
