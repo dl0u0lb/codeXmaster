@@ -1,11 +1,25 @@
-Want to match using like?
+Want to match using like and REGEX?
 Read this!
 
-Regular Expression Patterns
+LIKE  -- Basic search (can find "starts with A" or "contains test")
+REGEX -- Super search (can find "email format" or "phone number format" or "date format")
+
+LIKE
+LIKE  -- Case-sensitive
+ILIKE -- Case-insensitive
+Wildcards:
+%     -- Zero or more of ANY character
+_     -- Exactly ONE character
+
+Regular Expression
+~     -- Matches regex Case-sensitive
+~*    -- Matches regex Case-insensitive
+!~    -- Does NOT match Case-sensitive
+!~*   -- Does NOT match Case-insensitive
 Common Regex Patterns:
 Pattern   | Meaning                      | Example
-^         | Start of string              | ^Hello (starts with Hello)
-$         | End of string                | world$ (ends with world)
+^         | Anchors: Start of string     | ^Hello (starts with Hello)
+$         | Anchors: End of string       | world$ (ends with world)
 .         | Any single character         | a.c matches abc, a1c
 *         | Zero or more of previous     | ab*c matches ac, abc, abbc
 +         | One or more of previous      | ab+c matches abc, abbc NOT ac
@@ -18,4 +32,7 @@ $         | End of string                | world$ (ends with world)
 \d        | Digit (same as [0-9])        | \d\d matches 12, 99
 \w        | Word char (a-z, A-Z, 0-9, _) | \w+ matches hello_123
 \s        | Whitespace                   | \s matches space, tab, newline
+\         | Escape character             | \. literal dot
 \.        | Literal period               | \.com matches .com
+{a,b}     | Repetition between a and b   | {3} exactly repeat 3 times
+`         | `(pipe)                      | '|'
